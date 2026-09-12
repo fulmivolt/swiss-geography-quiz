@@ -1,0 +1,16 @@
+[
+  {"name":"Chasseral","aliases":[],"latitude":47.134416,"longitude":7.060277,"elevation":1607,"canton":"Bern / Neuchâtel"},
+  {"name":"Dents du Midi","aliases":["Haute Cime"],"latitude":46.162313,"longitude":6.924105,"elevation":3257,"canton":"Valais"},
+  {"name":"Pilatus","aliases":["Tomlishorn"],"latitude":46.9737,"longitude":8.2414,"elevation":2128,"canton":"Obwalden / Nidwalden"},
+  {"name":"Rigi","aliases":["Rigi Kulm"],"latitude":47.058108,"longitude":8.486406,"elevation":1797,"canton":"Schwyz"},
+  {"name":"Jungfrau","aliases":[],"latitude":46.538051,"longitude":7.963615,"elevation":4158,"canton":"Bern / Valais"},
+  {"name":"Mönch","aliases":["Monch"],"latitude":46.559769,"longitude":7.998303,"elevation":4110,"canton":"Bern / Valais"},
+  {"name":"Eiger","aliases":[],"latitude":46.578871,"longitude":8.006315,"elevation":3967,"canton":"Bern"},
+  {"name":"Matterhorn","aliases":["Monte Cervino","Cervino"],"latitude":45.977618,"longitude":7.659579,"elevation":4478,"canton":"Valais / Italia"},
+  {"name":"Dufourspitze","aliases":["Punta Dufour"],"latitude":45.938122,"longitude":7.867757,"elevation":4633,"canton":"Valais / Italia"},
+  {"name":"Säntis","aliases":["Santis"],"latitude":47.250766,"longitude":9.344492,"elevation":2502,"canton":"Appenzell Innerrhoden"},
+  {"name":"Glärnisch","aliases":["Glarnisch","Bächistock","Bachistock"],"latitude":46.994206,"longitude":8.990289,"elevation":2915,"canton":"Glarus"},
+  {"name":"Tödi","aliases":["Todi","Piz Russein"],"latitude":46.812480,"longitude":8.915814,"elevation":3612,"canton":"Glarus / Graubünden"},
+  {"name":"Monte Generoso","aliases":["Calvagione"],"latitude":45.932476,"longitude":9.021144,"elevation":1701,"canton":"Ticino / Italia"},
+  {"name":"Piz Bernina","aliases":["Bernina"],"latitude":46.383585,"longitude":9.909376,"elevation":4048,"canton":"Graubünden / Italia"}
+]

@@ -1,0 +1,18 @@
+[
+  {"name":"Gr. St. Bernhard","aliases":["Grand St-Bernard","Col du Grand Saint-Bernard","Gran San Bernardo"],"latitude":45.870249,"longitude":7.171309,"elevation":2469,"canton":"Valais / Italia"},
+  {"name":"Simplon","aliases":["Simplonpass","Passo del Sempione"],"latitude":46.251445,"longitude":8.032709,"elevation":2006,"canton":"Valais"},
+  {"name":"Vue des Alpes","aliases":["Col de la Vue des Alpes"],"latitude":47.073965,"longitude":6.870913,"elevation":1283,"canton":"Neuchâtel"},
+  {"name":"Brünig","aliases":["Brunig","Brünigpass"],"latitude":46.757783,"longitude":8.137630,"elevation":1008,"canton":"Bern / Obwalden"},
+  {"name":"Grimsel","aliases":["Grimselpass"],"latitude":46.562787,"longitude":8.338779,"elevation":2164,"canton":"Bern / Valais"},
+  {"name":"Furka","aliases":["Furkapass"],"latitude":46.573846,"longitude":8.416132,"elevation":2429,"canton":"Uri / Valais"},
+  {"name":"Nufenen","aliases":["Nufenenpass","Passo della Novena"],"latitude":46.478859,"longitude":8.390533,"elevation":2478,"canton":"Valais / Ticino"},
+  {"name":"Gotthard","aliases":["Gotthardpass","Passo del San Gottardo","San Gottardo"],"latitude":46.560577,"longitude":8.562272,"elevation":2106,"canton":"Uri / Ticino"},
+  {"name":"Oberalp","aliases":["Oberalppass","Cuolm d'Ursera","Cuolm Alpsu"],"latitude":46.659951,"longitude":8.672344,"elevation":2044,"canton":"Uri / Graubünden"},
+  {"name":"Lukmanier","aliases":["Passo del Lucomagno","Pass Lucmagn","Lucomagno"],"latitude":46.564656,"longitude":8.801793,"elevation":1917,"canton":"Ticino / Graubünden"},
+  {"name":"San Bernardino","aliases":["Bernhardinpass","Passo del San Bernardino"],"latitude":46.498393,"longitude":9.172352,"elevation":2066,"canton":"Graubünden"},
+  {"name":"Albula","aliases":["Albulapass","Pass d'Alvra"],"latitude":46.583605,"longitude":9.839020,"elevation":2311,"canton":"Graubünden"},
+  {"name":"Maloja","aliases":["Passo del Maloja","Maloggia"],"latitude":46.401180,"longitude":9.697093,"elevation":1815,"canton":"Graubünden"},
+  {"name":"Flüela","aliases":["Fluela","Flüelapass","Pass dal Flüela"],"latitude":46.749966,"longitude":9.950187,"elevation":2384,"canton":"Graubünden"},
+  {"name":"Ofen","aliases":["Ofenpass","Pass dal Fuorn","Fuorn"],"latitude":46.640941,"longitude":10.293842,"elevation":2148,"canton":"Graubünden"},
+  {"name":"Bernina","aliases":["Berninapass","Passo del Bernina","Pass dal Bernina"],"latitude":46.412158,"longitude":10.028983,"elevation":2327,"canton":"Graubünden"}
+]

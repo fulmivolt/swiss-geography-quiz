@@ -1,0 +1,290 @@
+{
+  "Zürich": {
+    "de": "Zürich",
+    "en": "Zurich"
+  },
+  "Bern": {
+    "de": "Bern",
+    "en": "Bern",
+    "aliases": [
+      "Berne"
+    ]
+  },
+  "Luzern": {
+    "de": "Luzern",
+    "en": "Lucerne"
+  },
+  "Fribourg": {
+    "de": "Freiburg",
+    "en": "Fribourg",
+    "aliases": [
+      "Freiburg im Üechtland"
+    ]
+  },
+  "Graubünden": {
+    "de": "Graubünden",
+    "en": "Grisons",
+    "aliases": [
+      "Graubuenden"
+    ]
+  },
+  "Ticino": {
+    "de": "Tessin",
+    "en": "Ticino"
+  },
+  "Vaud": {
+    "de": "Waadt",
+    "en": "Vaud"
+  },
+  "Valais": {
+    "de": "Wallis",
+    "en": "Valais"
+  },
+  "Neuchâtel": {
+    "de": "Neuenburg",
+    "en": "Neuchâtel"
+  },
+  "Genève": {
+    "de": "Genf",
+    "en": "Geneva",
+    "aliases": [
+      "Genf"
+    ]
+  },
+  "Sion": {
+    "de": "Sitten",
+    "en": "Sion"
+  },
+  "Delémont": {
+    "de": "Delsberg",
+    "en": "Delémont"
+  },
+  "Bellinzona": {
+    "de": "Bellinzona",
+    "en": "Bellinzona",
+    "aliases": [
+      "Bellenz",
+      "Bellinzone"
+    ]
+  },
+  "Lausanne": {
+    "de": "Lausanne",
+    "en": "Lausanne"
+  },
+  "Yverdon-les-Bains": {
+    "de": "Yverdon-les-Bains",
+    "en": "Yverdon-les-Bains",
+    "aliases": [
+      "Iferten"
+    ]
+  },
+  "Martigny": {
+    "de": "Martigny",
+    "en": "Martigny",
+    "aliases": [
+      "Martinach"
+    ]
+  },
+  "Locarno": {
+    "de": "Locarno",
+    "en": "Locarno",
+    "aliases": [
+      "Luggarus"
+    ]
+  },
+  "Lugano": {
+    "de": "Lugano",
+    "en": "Lugano",
+    "aliases": [
+      "Lauis"
+    ]
+  },
+  "Siders / Sierre": {
+    "de": "Siders",
+    "en": "Sierre"
+  },
+  "Biel / Bienne": {
+    "de": "Biel",
+    "en": "Biel/Bienne"
+  },
+  "Schuls / Scuol": {
+    "de": "Scuol",
+    "en": "Scuol",
+    "aliases": [
+      "Schuls"
+    ]
+  },
+  "Rhein": {
+    "de": "Rhein",
+    "en": "Rhine"
+  },
+  "Rhône": {
+    "de": "Rhône",
+    "en": "Rhône"
+  },
+  "Linth-Kanal": {
+    "de": "Linthkanal",
+    "en": "Linth Canal"
+  },
+  "Vorderrhein": {
+    "de": "Vorderrhein",
+    "en": "Anterior Rhine"
+  },
+  "Hinterrhein": {
+    "de": "Hinterrhein",
+    "en": "Posterior Rhine"
+  },
+  "Saane / Sarine": {
+    "de": "Saane",
+    "en": "Sarine"
+  },
+  "Tessin / Ticino": {
+    "de": "Tessin",
+    "en": "Ticino"
+  },
+  "Genfersee / Lac Léman": {
+    "de": "Genfersee",
+    "en": "Lake Geneva"
+  },
+  "Neuenburgersee": {
+    "de": "Neuenburgersee",
+    "en": "Lake Neuchâtel"
+  },
+  "Bielersee": {
+    "de": "Bielersee",
+    "en": "Lake Biel"
+  },
+  "Murtensee": {
+    "de": "Murtensee",
+    "en": "Lake Murten"
+  },
+  "Thunersee": {
+    "de": "Thunersee",
+    "en": "Lake Thun"
+  },
+  "Brienzersee": {
+    "de": "Brienzersee",
+    "en": "Lake Brienz"
+  },
+  "Vierwaldstättersee": {
+    "de": "Vierwaldstättersee",
+    "en": "Lake Lucerne"
+  },
+  "Zugersee": {
+    "de": "Zugersee",
+    "en": "Lake Zug"
+  },
+  "Zürichsee": {
+    "de": "Zürichsee",
+    "en": "Lake Zurich"
+  },
+  "Walensee": {
+    "de": "Walensee",
+    "en": "Lake Walen"
+  },
+  "Bodensee": {
+    "de": "Bodensee",
+    "en": "Lake Constance"
+  },
+  "Greyerzersee": {
+    "de": "Greyerzersee",
+    "en": "Lake Gruyère"
+  },
+  "Langensee / Lago Maggiore": {
+    "de": "Langensee",
+    "en": "Lake Maggiore"
+  },
+  "Luganersee / Lago di Lugano": {
+    "de": "Luganersee",
+    "en": "Lake Lugano"
+  },
+  "Lago di Como": {
+    "de": "Comer See",
+    "en": "Lake Como",
+    "aliases": [
+      "Comersee"
+    ]
+  },
+  "Gr. St. Bernhard": {
+    "de": "Grosser St. Bernhard",
+    "en": "Great St Bernard Pass",
+    "aliases": [
+      "Grosser Sankt Bernhard",
+      "Großer Sankt Bernhard",
+      "Grosser St Bernhard",
+      "Great Saint Bernard"
+    ]
+  },
+  "Simplon": {
+    "de": "Simplonpass",
+    "en": "Simplon Pass"
+  },
+  "Vue des Alpes": {
+    "de": "Vue des Alpes",
+    "en": "Vue des Alpes"
+  },
+  "Brünig": {
+    "de": "Brünigpass",
+    "en": "Brünig Pass"
+  },
+  "Grimsel": {
+    "de": "Grimselpass",
+    "en": "Grimsel Pass"
+  },
+  "Furka": {
+    "de": "Furkapass",
+    "en": "Furka Pass"
+  },
+  "Nufenen": {
+    "de": "Nufenenpass",
+    "en": "Nufenen Pass"
+  },
+  "Gotthard": {
+    "de": "Gotthardpass",
+    "en": "Gotthard Pass",
+    "aliases": [
+      "Saint Gotthard Pass",
+      "St Gotthard",
+      "Sankt Gotthard"
+    ]
+  },
+  "Oberalp": {
+    "de": "Oberalppass",
+    "en": "Oberalp Pass"
+  },
+  "Lukmanier": {
+    "de": "Lukmanierpass",
+    "en": "Lukmanier Pass"
+  },
+  "San Bernardino": {
+    "de": "San-Bernardino-Pass",
+    "en": "San Bernardino Pass",
+    "aliases": [
+      "San Bernardinopass"
+    ]
+  },
+  "Albula": {
+    "de": "Albulapass",
+    "en": "Albula Pass"
+  },
+  "Maloja": {
+    "de": "Malojapass",
+    "en": "Maloja Pass"
+  },
+  "Flüela": {
+    "de": "Flüelapass",
+    "en": "Flüela Pass"
+  },
+  "Ofen": {
+    "de": "Ofenpass",
+    "en": "Ofen Pass"
+  },
+  "Bernina": {
+    "de": "Berninapass",
+    "en": "Bernina Pass"
+  },
+  "Italia": {
+    "de": "Italien",
+    "en": "Italy"
+  }
+}

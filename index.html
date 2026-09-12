@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1018" />
+    <meta name="description" content="Swiss geography quiz — Deutsch / English. Cantons, capitals, cities, rivers, lakes, mountains and Alpine passes." />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e52835'/%3E%3Cpath fill='white' d='M26 13h12v13h13v12H38v13H26V38H13V26h13z'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./leaflet.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>Svizzera — Interactive Geography Quiz</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <button class="brand" id="brand-home" aria-label="Torna al menu">
+          <span class="flag" aria-hidden="true"><span></span></span>
+          <span>SVIZZERA</span>
+          <small>Geography Quiz</small>
+        </button>
+        <div class="topbar-meta">
+          <label class="language-control"><span class="sr-only">Language / Sprache</span><select id="language-select" aria-label="Language / Sprache"><option value="de">Deutsch</option><option value="en">English</option></select></label>
+          <span class="data-status"><i></i><span id="connection-status">Dati geografici reali</span></span>
+          <button class="icon-button" id="info-button" aria-label="Informazioni sui dati">i</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="menu-view" id="menu-view">
+          <div class="menu-heading">
+            <div>
+              <p class="eyebrow">ALLENAMENTO CARTOGRAFICO</p>
+              <h1>Quanto conosci la Svizzera?</h1>
+              <p>Scegli una materia, imposta il livello e localizza ogni risposta su una mappa geografica vera.</p>
+            </div>
+            <div class="swiss-mark" aria-hidden="true"><span></span></div>
+          </div>
+
+          <div class="setup-panel" aria-label="Impostazioni del quiz">
+            <fieldset>
+              <legend>Difficoltà</legend>
+              <div class="segmented" id="difficulty-control">
+                <button type="button" data-value="easy">Facile</button>
+                <button type="button" data-value="normal" class="active">Normale</button>
+                <button type="button" data-value="hard">Difficile</button>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Risposta</legend>
+              <div class="segmented" id="answer-mode-control">
+                <button type="button" data-value="map" class="active">Sulla mappa</button>
+                <button type="button" data-value="write">Scrivendo</button>
+              </div>
+            </fieldset>
+            <div class="full-course-note">
+              <span>Domande</span>
+              <strong>Tutte, in ordine casuale</strong>
+            </div>
+          </div>
+
+          <div class="quiz-grid" id="quiz-grid" aria-label="Modalità di quiz"></div>
+        </section>
+
+        <section class="quiz-view hidden" id="quiz-view" aria-label="Quiz in corso">
+          <aside class="quiz-panel">
+            <div class="quiz-panel-top">
+              <button class="back-button" id="back-button" type="button"><span aria-hidden="true">←</span> Menu</button>
+              <span class="mode-badge" id="mode-badge"></span>
+            </div>
+
+            <div class="progress-row">
+              <span id="progress-label">Domanda 1</span>
+              <span id="elapsed-time">00:00</span>
+            </div>
+            <div class="progress-track"><span id="progress-bar"></span></div>
+            <div class="timer-track hidden" id="timer-track"><span id="timer-bar"></span></div>
+
+            <section class="question-card">
+              <p class="eyebrow" id="category-label">CANTONI</p>
+              <h2 id="question-text" tabindex="-1">Caricamento domanda…</h2>
+              <p class="question-hint" id="question-hint"></p>
+
+              <form class="answer-form hidden" id="answer-form" novalidate>
+                <label for="answer-input">La tua risposta</label>
+                <div class="input-row">
+                  <input id="answer-input" type="text" autocomplete="off" spellcheck="false" placeholder="Scrivi qui…" />
+                  <button class="primary-button" type="submit">Controlla</button>
+                </div>
+                <p class="input-error" id="input-error" role="alert"></p>
+              </form>
+            </section>
+
+            <section class="feedback-card hidden" id="feedback-card" aria-live="assertive">
+              <div class="feedback-icon" id="feedback-icon"></div>
+              <div>
+                <h3 id="feedback-title"></h3>
+                <p id="feedback-copy"></p>
+                <p class="answer-details" id="answer-details"></p>
+              </div>
+            </section>
+
+            <div class="score-grid" aria-label="Punteggio">
+              <div><span>Punti</span><strong id="score-points">0</strong></div>
+              <div><span>Corrette</span><strong id="score-correct">0</strong></div>
+              <div><span>Errori</span><strong id="score-wrong">0</strong></div>
+              <div><span>Precisione</span><strong id="score-percent">—</strong></div>
+            </div>
+
+            <button class="continue-button hidden" id="continue-button" type="button">Continua <span aria-hidden="true">→</span></button>
+            <p class="interaction-tip" id="interaction-tip">Clicca direttamente sulla mappa.</p>
+          </aside>
+
+          <div class="map-stage">
+            <div class="map-toolbar">
+              <div>
+                <span class="map-title" id="map-title">Mappa della Svizzera</span>
+                <span class="map-subtitle" id="map-subtitle">Confini cantonali ufficiali</span>
+              </div>
+              <div class="map-actions">
+                <button id="reset-map" type="button" title="Reimposta vista" aria-label="Reimposta la vista">⌖</button>
+                <button id="fullscreen-map" type="button" title="Schermo intero" aria-label="Apri mappa a schermo intero">⛶</button>
+              </div>
+            </div>
+            <div id="map" role="application" aria-label="Mappa interattiva della Svizzera"></div>
+            <div class="map-legend">
+              <span><i class="legend-canton"></i>Cantoni</span>
+              <span id="legend-water-item"><i class="legend-water"></i>Acque</span>
+              <span class="legend-feedback hidden" id="legend-feedback"><i class="legend-correct"></i>Corretta <i class="legend-wrong"></i>Scelta</span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="info-dialog">
+      <button class="dialog-close" id="info-close" aria-label="Chiudi">×</button>
+      <p class="eyebrow">FONTI CARTOGRAFICHE</p>
+      <h2>Una mappa, non un’illustrazione</h2>
+      <p>I confini dei 26 cantoni provengono da swissBOUNDARIES3D 2026. Fiumi e laghi sono estratti da swissTLMRegio 2025; località, vette e passi usano coordinate geografiche reali. La base cartografica è © OpenStreetMap.</p>
+      <p>I laghi transfrontalieri sono mostrati nella loro geometria completa quando disponibile nel dataset.</p>
+      <button class="primary-button" id="info-ok" type="button">Ho capito</button>
+    </dialog>
+
+    <dialog id="exit-dialog">
+      <p class="eyebrow">QUIZ IN CORSO</p>
+      <h2>Tornare al menu?</h2>
+      <p>I risultati di questa sessione verranno azzerati.</p>
+      <div class="dialog-actions">
+        <button id="exit-cancel" type="button">Continua il quiz</button>
+        <button class="danger-button" id="exit-confirm" type="button">Esci</button>
+      </div>
+    </dialog>
+
+    <noscript><p class="browser-notice">Enable JavaScript to play Swiss Geography Quiz. / Aktiviere JavaScript, um das Quiz zu spielen.</p></noscript>
+    <script src="./leaflet.js"></script>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
