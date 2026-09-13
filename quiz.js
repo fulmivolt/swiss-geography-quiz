@@ -6,8 +6,10 @@ export const QUIZ_CATALOG = [
   { id: "capitals", number: "02", icon: "◎", title: "Capitali cantonali", description: "Associa ogni cantone alla sua capitale e localizzala.", count: 26, category: "CAPITALI", geometry: "point" },
   { id: "cities", number: "03", icon: "●", title: "Città", description: "Trova 22 città e scegli se aggiungere anche i 26 capoluoghi cantonali.", count: 22, category: "CITTÀ", geometry: "point" },
   { id: "waters", number: "04", icon: "≈", title: "Fiumi e laghi", description: "Segui corsi d’acqua e riconosci i profili dei laghi.", count: 31, category: "ACQUE", geometry: "water" },
-  { id: "mountains", number: "05", icon: "▲", title: "Montagne", description: "Localizza 14 vette con coordinate e altitudini reali.", count: 14, category: "MONTAGNE", geometry: "point" },
-  { id: "passes", number: "06", icon: "◇", title: "Passi alpini", description: "Impara 16 valichi lungo l’arco alpino svizzero.", count: 16, category: "PASSI", geometry: "point" }
+  { id: "rivers", number: "05", icon: "∿", title: "Fiumi", description: "Segui separatamente i 16 fiumi del quiz.", count: 16, category: "FIUMI", geometry: "water" },
+  { id: "lakes", number: "06", icon: "◒", title: "Laghi", description: "Riconosci separatamente i profili dei 15 laghi.", count: 15, category: "LAGHI", geometry: "water" },
+  { id: "mountains", number: "07", icon: "▲", title: "Montagne", description: "Localizza 14 vette con coordinate e altitudini reali.", count: 14, category: "MONTAGNE", geometry: "point" },
+  { id: "passes", number: "08", icon: "◇", title: "Passi alpini", description: "Impara 16 valichi lungo l’arco alpino svizzero.", count: 16, category: "PASSI", geometry: "point" }
 ];
 
 export const shuffle = (items) => {
@@ -43,8 +45,13 @@ export function buildItems(quizId, data, { includeCapitals = false } = {}) {
   }
   if (quizId === "mountains") return data.mountains.map((item) => ({ ...item, key: item.name, markerType: "mountain" }));
   if (quizId === "passes") return data.passes.map((item) => ({ ...item, key: item.name, markerType: "pass" }));
-  if (quizId === "waters") {
-    return [...data.rivers.features, ...data.lakes.features].map((feature) => ({
+  if (["waters", "rivers", "lakes"].includes(quizId)) {
+    const features = quizId === "rivers"
+      ? data.rivers.features
+      : quizId === "lakes"
+        ? data.lakes.features
+        : [...data.rivers.features, ...data.lakes.features];
+    return features.map((feature) => ({
       ...feature.properties,
       key: feature.properties.name,
       feature
@@ -55,7 +62,7 @@ export function buildItems(quizId, data, { includeCapitals = false } = {}) {
 
 export function questionText(quizId, mode, item) {
   const name = placeName(quizId === "capitals" ? item.cantonName : item);
-  const type = quizId === "waters" ? item.category : quizId;
+  const type = ["waters", "rivers", "lakes"].includes(quizId) ? item.category : quizId;
   return t(mode === "write" ? `write.${type}` : ["cantons", "capitals"].includes(quizId) ? `map.${quizId}` : "map.place", { name });
 }
 

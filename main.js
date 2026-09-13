@@ -48,6 +48,7 @@ const elements = {
 };
 
 const settings = { difficulty: "normal", mode: "map" };
+const WATER_QUIZ_IDS = ["waters", "rivers", "lakes"];
 const WRITTEN_CORRECT_DELAY_MS = 650;
 let data;
 let loadFailed = false;
@@ -143,8 +144,8 @@ function startQuiz(quizId, { includeCapitals = false } = {}) {
   document.querySelector(".result-panel")?.remove();
   elements.modeBadge.textContent = `${t(session.mode === "map" ? "Mappa" : "Scrittura")} · ${difficultyLabel(session.difficulty)}`;
   elements.mapTitle.textContent = t(config.title);
-  elements.mapSubtitle.textContent = t(quizId === "waters" ? "Geometrie ufficiali swissTLMRegio" : "Confini cantonali ufficiali");
-  elements.legendWater.classList.toggle("hidden", quizId !== "waters");
+  elements.mapSubtitle.textContent = t(WATER_QUIZ_IDS.includes(quizId) ? "Geometrie ufficiali swissTLMRegio" : "Confini cantonali ufficiali");
+  elements.legendWater.classList.toggle("hidden", !WATER_QUIZ_IDS.includes(quizId));
   updateScore();
   window.scrollTo({ top: 0, behavior: "auto" });
 
@@ -447,7 +448,7 @@ function refreshLanguage() {
   if (!session || !geographyMap) return;
   elements.modeBadge.textContent = `${t(session.mode === "map" ? "Mappa" : "Scrittura")} · ${difficultyLabel(session.difficulty)}`;
   elements.mapTitle.textContent = t(session.config.title);
-  elements.mapSubtitle.textContent = t(session.quizId === "waters" ? "Geometrie ufficiali swissTLMRegio" : "Confini cantonali ufficiali");
+  elements.mapSubtitle.textContent = t(WATER_QUIZ_IDS.includes(session.quizId) ? "Geometrie ufficiali swissTLMRegio" : "Confini cantonali ufficiali");
   elements.category.textContent = t(session.config.category);
   elements.question.textContent = questionText(session.quizId, session.mode, currentItem());
   elements.progressLabel.textContent = t("Domanda {current} / {total}", { current: session.index + 1, total: session.questions.length });

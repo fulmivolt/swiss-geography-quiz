@@ -110,10 +110,16 @@ export class GeographyMap {
 
     if (!this.map.hasLayer(this.baseGroup)) this.baseGroup.addTo(this.map);
 
-    if (quizId === "waters") {
-      this.renderWaters({ interactive: mode === "map", labels: difficulty === "easy" });
+    if (["waters", "rivers", "lakes"].includes(quizId)) {
+      this.renderWaters({
+        interactive: mode === "map",
+        labels: difficulty === "easy",
+        includeRivers: quizId !== "lakes",
+        includeLakes: quizId !== "rivers"
+      });
       if (mode === "write") this.emphasizeFeature(item.key, COLORS.target);
-      const bounds = L.latLngBounds(this.countryBounds.getSouthWest(), this.countryBounds.getNorthEast()).extend(this.waterBounds);
+      const bounds = L.latLngBounds(this.countryBounds.getSouthWest(), this.countryBounds.getNorthEast());
+      if (quizId !== "rivers") bounds.extend(this.waterBounds);
       this.map.fitBounds(bounds, { padding: [18, 18], animate: false });
       return;
     }
@@ -167,8 +173,8 @@ export class GeographyMap {
     }).addTo(this.quizGroup);
   }
 
-  renderWaters({ interactive, labels }) {
-    for (const feature of this.data.lakes.features) {
+  renderWaters({ interactive, labels, includeRivers = true, includeLakes = true }) {
+    for (const feature of includeLakes ? this.data.lakes.features : []) {
       const name = feature.properties.name;
       const layer = L.geoJSON(feature, {
         interactive,
@@ -188,7 +194,7 @@ export class GeographyMap {
       });
     }
 
-    for (const feature of this.data.rivers.features) {
+    for (const feature of includeRivers ? this.data.rivers.features : []) {
       const name = feature.properties.name;
       const visible = L.geoJSON(feature, {
         interactive: false,

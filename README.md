@@ -2,7 +2,7 @@
 
 Play: https://fulmivolt.github.io/swiss-geography-quiz/
 
-Interactive Swiss geography quiz for desktop, tablet and phone browsers. German and English interface. Six topics, three difficulty levels, map or written answers.
+Interactive Swiss geography quiz for desktop, tablet and phone browsers. German and English interface. Eight topics, three difficulty levels, map or written answers. Rivers and lakes can be played together or separately.
 
 Before the cities quiz starts, choose between the 22 non-capital localities or a 48-question session that also includes all 26 cantonal capitals.
 
