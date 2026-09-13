@@ -4,7 +4,7 @@ import { placeName, nameVariants } from "./names.js";
 export const QUIZ_CATALOG = [
   { id: "cantons", number: "01", icon: "⬡", title: "Cantoni", description: "Riconosci tutti i 26 cantoni dai loro confini reali.", count: 26, category: "CANTONI", geometry: "area" },
   { id: "capitals", number: "02", icon: "◎", title: "Capitali cantonali", description: "Associa ogni cantone alla sua capitale e localizzala.", count: 26, category: "CAPITALI", geometry: "point" },
-  { id: "cities", number: "03", icon: "●", title: "Città", description: "Trova 22 centri urbani distribuiti in tutta la Svizzera.", count: 22, category: "CITTÀ", geometry: "point" },
+  { id: "cities", number: "03", icon: "●", title: "Città", description: "Trova 22 città svizzere che non sono capoluoghi cantonali.", count: 22, category: "CITTÀ", geometry: "point" },
   { id: "waters", number: "04", icon: "≈", title: "Fiumi e laghi", description: "Segui corsi d’acqua e riconosci i profili dei laghi.", count: 31, category: "ACQUE", geometry: "water" },
   { id: "mountains", number: "05", icon: "▲", title: "Montagne", description: "Localizza 14 vette con coordinate e altitudini reali.", count: 14, category: "MONTAGNE", geometry: "point" },
   { id: "passes", number: "06", icon: "◇", title: "Passi alpini", description: "Impara 16 valichi lungo l’arco alpino svizzero.", count: 16, category: "PASSI", geometry: "point" }
