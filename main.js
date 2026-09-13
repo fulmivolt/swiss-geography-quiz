@@ -47,6 +47,7 @@ const elements = {
 };
 
 const settings = { difficulty: "normal", mode: "map" };
+const WRITTEN_CORRECT_DELAY_MS = 650;
 let data;
 let loadFailed = false;
 let geographyMap;
@@ -156,6 +157,7 @@ function currentItem() {
 
 function showQuestion() {
   if (!session) return;
+  window.clearTimeout(session.autoAdvanceTimer);
   const item = currentItem();
   session.answered = false;
   session.timeRemaining = session.questionTimeLimit;
@@ -265,7 +267,11 @@ function submitResult({ correct, selectedKey, clickedLatLng, lead = "" }) {
 
   session.lastResult = { correct, selectedKey, clickedLatLng, lead, earned };
   renderFeedback();
-  elements.continue.focus({ preventScroll: true });
+  if (correct && session.mode === "write") {
+    session.autoAdvanceTimer = window.setTimeout(nextQuestion, WRITTEN_CORRECT_DELAY_MS);
+  } else {
+    elements.continue.focus({ preventScroll: true });
+  }
 }
 
 function renderFeedback() {
@@ -280,7 +286,8 @@ function renderFeedback() {
     : `${lead ? `${lead} ` : ""}${t("La risposta corretta era: {name}.", { name: placeName(item) })}`;
   elements.details.textContent = formatDetails(item);
   elements.input.disabled = true;
-  elements.continue.classList.remove("hidden");
+  const autoAdvances = correct && session.mode === "write";
+  elements.continue.classList.toggle("hidden", autoAdvances);
   elements.legendFeedback.classList.remove("hidden");
 
   geographyMap.showResult({
@@ -303,6 +310,7 @@ function updateScore() {
 
 function nextQuestion() {
   if (!session?.answered) return;
+  window.clearTimeout(session.autoAdvanceTimer);
   if (session.index >= session.questions.length - 1) {
     finishQuiz();
     return;
@@ -312,6 +320,7 @@ function nextQuestion() {
 }
 
 function finishQuiz() {
+  window.clearTimeout(session.autoAdvanceTimer);
   window.clearInterval(session.questionTimer);
   window.clearInterval(session.elapsedTimer);
   if (!session.finished) updateElapsedTime();
@@ -349,6 +358,7 @@ function finishQuiz() {
 
 function clearSessionTimers() {
   if (!session) return;
+  window.clearTimeout(session.autoAdvanceTimer);
   window.clearInterval(session.questionTimer);
   window.clearInterval(session.elapsedTimer);
 }
