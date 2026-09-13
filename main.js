@@ -43,6 +43,7 @@ const elements = {
   questionCard: $(".question-card"),
   exitDialog: $("#exit-dialog"),
   infoDialog: $("#info-dialog"),
+  cityOptionsDialog: $("#city-options-dialog"),
   mapStage: $(".map-stage")
 };
 
@@ -73,7 +74,7 @@ function renderCatalog() {
 
   elements.grid.onclick = (event) => {
     const button = event.target.closest("[data-quiz]");
-    if (button) startQuiz(button.dataset.quiz);
+    if (button) requestQuizStart(button.dataset.quiz);
   };
 }
 
@@ -102,15 +103,25 @@ function difficultyLabel(value) {
   return t({ easy: "Facile · guida", normal: "Normale", hard: "Difficile · 20 s" }[value]);
 }
 
-function startQuiz(quizId) {
+function requestQuizStart(quizId) {
+  if (!data) return;
+  if (quizId === "cities") {
+    elements.cityOptionsDialog.showModal();
+    return;
+  }
+  startQuiz(quizId);
+}
+
+function startQuiz(quizId, { includeCapitals = false } = {}) {
   if (!data) return;
   const config = QUIZ_CATALOG.find((quiz) => quiz.id === quizId);
-  const allItems = buildItems(quizId, data);
+  const allItems = buildItems(quizId, data, { includeCapitals });
   const questions = shuffle(allItems);
 
   clearSessionTimers();
   session = {
     quizId,
+    includeCapitals,
     config,
     items: allItems,
     questions,
@@ -351,7 +362,7 @@ function finishQuiz() {
     </div>
   `;
   elements.questionCard.insertAdjacentElement("afterend", result);
-  result.querySelector("#result-restart").addEventListener("click", () => startQuiz(session.quizId));
+  result.querySelector("#result-restart").addEventListener("click", () => startQuiz(session.quizId, { includeCapitals: session.includeCapitals }));
   result.querySelector("#result-menu").addEventListener("click", showMenu);
   result.querySelector("#result-restart").focus({ preventScroll: true });
 }
@@ -399,6 +410,14 @@ function bindUi() {
   $("#info-button").addEventListener("click", () => elements.infoDialog.showModal());
   $("#info-close").addEventListener("click", () => elements.infoDialog.close());
   $("#info-ok").addEventListener("click", () => elements.infoDialog.close());
+  $("#city-only-button").addEventListener("click", () => {
+    elements.cityOptionsDialog.close();
+    startQuiz("cities");
+  });
+  $("#city-capitals-button").addEventListener("click", () => {
+    elements.cityOptionsDialog.close();
+    startQuiz("cities", { includeCapitals: true });
+  });
   $("#reset-map").addEventListener("click", () => geographyMap?.resetView());
   $("#fullscreen-map").addEventListener("click", async () => {
     if (elements.mapStage.classList.contains("map-expanded")) return setExpandedMap(false);
@@ -473,6 +492,7 @@ async function initialize() {
     await nativeApp.addListener("backButton", () => {
       if (elements.infoDialog.open) return elements.infoDialog.close();
       if (elements.exitDialog.open) return elements.exitDialog.close();
+      if (elements.cityOptionsDialog.open) return elements.cityOptionsDialog.close();
       if (document.fullscreenElement) return document.exitFullscreen();
       if (elements.mapStage.classList.contains("map-expanded")) {
         elements.mapStage.classList.remove("map-expanded");

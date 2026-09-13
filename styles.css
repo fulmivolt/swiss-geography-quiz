@@ -176,6 +176,8 @@ dialog p { color: var(--muted); line-height: 1.6; }
 dialog > .primary-button { margin-top: 10px; }
 .dialog-actions { display: flex; gap: 9px; justify-content: flex-end; margin-top: 22px; }
 .dialog-actions button { min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; }
+.compact-dialog { width: min(440px, calc(100% - 32px)); }
+.city-option-actions .primary-button { background: var(--red); border-color: var(--red); color: white; }
 .danger-button { background: var(--red-dark) !important; border-color: transparent !important; }
 
 @media (max-width: 920px) {

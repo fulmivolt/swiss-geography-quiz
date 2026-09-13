@@ -4,7 +4,7 @@ import { placeName, nameVariants } from "./names.js";
 export const QUIZ_CATALOG = [
   { id: "cantons", number: "01", icon: "⬡", title: "Cantoni", description: "Riconosci tutti i 26 cantoni dai loro confini reali.", count: 26, category: "CANTONI", geometry: "area" },
   { id: "capitals", number: "02", icon: "◎", title: "Capitali cantonali", description: "Associa ogni cantone alla sua capitale e localizzala.", count: 26, category: "CAPITALI", geometry: "point" },
-  { id: "cities", number: "03", icon: "●", title: "Città", description: "Trova 22 città svizzere che non sono capoluoghi cantonali.", count: 22, category: "CITTÀ", geometry: "point" },
+  { id: "cities", number: "03", icon: "●", title: "Città", description: "Trova 22 città e scegli se aggiungere anche i 26 capoluoghi cantonali.", count: 22, category: "CITTÀ", geometry: "point" },
   { id: "waters", number: "04", icon: "≈", title: "Fiumi e laghi", description: "Segui corsi d’acqua e riconosci i profili dei laghi.", count: 31, category: "ACQUE", geometry: "water" },
   { id: "mountains", number: "05", icon: "▲", title: "Montagne", description: "Localizza 14 vette con coordinate e altitudini reali.", count: 14, category: "MONTAGNE", geometry: "point" },
   { id: "passes", number: "06", icon: "◇", title: "Passi alpini", description: "Impara 16 valichi lungo l’arco alpino svizzero.", count: 16, category: "PASSI", geometry: "point" }
@@ -19,7 +19,7 @@ export const shuffle = (items) => {
   return copy;
 };
 
-export function buildItems(quizId, data) {
+export function buildItems(quizId, data, { includeCapitals = false } = {}) {
   if (quizId === "cantons") return data.cantons.map((item) => ({ ...item, key: item.name }));
   if (quizId === "capitals") {
     return data.cantons.map((canton) => ({
@@ -29,7 +29,18 @@ export function buildItems(quizId, data) {
       cantonId: canton.id
     }));
   }
-  if (quizId === "cities") return data.cities.map((item) => ({ ...item, key: item.name }));
+  if (quizId === "cities") {
+    const cities = data.cities.map((item) => ({ ...item, key: item.name }));
+    if (!includeCapitals) return cities;
+    const capitals = data.cantons.map((canton) => ({
+      ...canton.capital,
+      key: canton.capital.name,
+      cantonName: canton.name,
+      cantonId: canton.id,
+      isCantonalCapital: true
+    }));
+    return [...cities, ...capitals];
+  }
   if (quizId === "mountains") return data.mountains.map((item) => ({ ...item, key: item.name, markerType: "mountain" }));
   if (quizId === "passes") return data.passes.map((item) => ({ ...item, key: item.name, markerType: "pass" }));
   if (quizId === "waters") {
