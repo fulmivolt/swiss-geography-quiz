@@ -24,6 +24,16 @@ export const shuffle = (items) => {
   return copy;
 };
 
+export function assignAnswerModes(quizId, questions, mode, firstMode = Math.random() < 0.5 ? "map" : "write") {
+  let nextMode = firstMode;
+  return questions.map((item) => {
+    const special = ["profile", "landscapes"].includes(item.sourceQuizId ?? quizId);
+    const responseMode = special ? "write" : mode === "mixed" ? nextMode : mode;
+    if (!special && mode === "mixed") nextMode = nextMode === "map" ? "write" : "map";
+    return { ...item, responseMode };
+  });
+}
+
 export function buildItems(quizId, data, { includeCapitals = false } = {}) {
   if (quizId === "cantons") return data.cantons.map((item) => ({ ...item, key: item.name }));
   if (quizId === "capitals") {

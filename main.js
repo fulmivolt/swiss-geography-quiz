@@ -3,7 +3,7 @@ import { placeName } from "./names.js";
 import { loadGeographyData } from "./data-loader.js";
 import { GeographyMap } from "./map.js";
 import { ScoreTracker } from "./scoring.js";
-import { QUIZ_CATALOG, acceptedAnswers, answerLabel, buildItems, formatDetails, landscapeDrawingScore, normalizeAnswer, questionText, questionTimeLimit, shuffle } from "./quiz.js";
+import { QUIZ_CATALOG, acceptedAnswers, answerLabel, assignAnswerModes, buildItems, formatDetails, landscapeDrawingScore, normalizeAnswer, questionText, questionTimeLimit, shuffle } from "./quiz.js";
 
 const $ = (selector) => document.querySelector(selector);
 const elements = {
@@ -138,7 +138,12 @@ function activeQuizId() {
 }
 
 function activeMode() {
-  return SPECIAL_WRITTEN_IDS.includes(activeQuizId()) ? "write" : session.mode;
+  return currentItem().responseMode;
+}
+
+function answerModeLabel() {
+  const label = t(activeMode() === "map" ? "Mappa" : "Scrittura");
+  return session.mode === "mixed" && !SPECIAL_WRITTEN_IDS.includes(activeQuizId()) ? `${t("Misto")} · ${label}` : label;
 }
 
 function activeConfig() {
@@ -158,7 +163,7 @@ function startQuiz(quizId, { includeCapitals = false } = {}) {
   if (!data) return;
   const config = QUIZ_CATALOG.find((quiz) => quiz.id === quizId);
   const allItems = buildItems(quizId, data, { includeCapitals });
-  const questions = shuffle(allItems);
+  const questions = assignAnswerModes(quizId, shuffle(allItems), settings.mode);
 
   clearSessionTimers();
   session = {
@@ -184,7 +189,7 @@ function startQuiz(quizId, { includeCapitals = false } = {}) {
   elements.scoreGrid.classList.remove("hidden");
   elements.tip.classList.remove("hidden");
   document.querySelector(".result-panel")?.remove();
-  elements.modeBadge.textContent = `${t(quizId === "all" ? "Misto" : session.mode === "map" ? "Mappa" : "Scrittura")} · ${difficultyLabel(session.difficulty)}`;
+  elements.modeBadge.textContent = `${answerModeLabel()} · ${difficultyLabel(session.difficulty)}`;
   elements.mapTitle.textContent = t(config.title);
   elements.mapSubtitle.textContent = t(WATER_QUIZ_IDS.includes(quizId) ? "Geometrie ufficiali swissTLMRegio" : "Confini cantonali ufficiali");
   elements.legendWater.classList.toggle("hidden", !WATER_QUIZ_IDS.includes(quizId));
@@ -221,7 +226,7 @@ function showQuestion() {
   session.questionTimeLimit = questionTimeLimit(quizId, session.difficulty);
   session.timeRemaining = session.questionTimeLimit;
   session.landscapeSelection = null;
-  elements.modeBadge.textContent = `${t(session.quizId === "all" ? "Misto" : mode === "map" ? "Mappa" : "Scrittura")} · ${difficultyLabel(session.difficulty, session.quizId === "all" ? "all" : quizId)}`;
+  elements.modeBadge.textContent = `${answerModeLabel()} · ${difficultyLabel(session.difficulty, session.quizId === "all" ? "all" : quizId)}`;
 
   elements.category.textContent = t(config.category);
   elements.question.textContent = questionText(quizId, mode, item);
@@ -606,7 +611,7 @@ function refreshLanguage() {
   if (elements.profileDialog.open) renderProfileStudy();
   updateConnectionStatus();
   if (!session || !geographyMap) return;
-  elements.modeBadge.textContent = `${t(session.quizId === "all" ? "Misto" : activeMode() === "map" ? "Mappa" : "Scrittura")} · ${difficultyLabel(session.difficulty, session.quizId === "all" ? "all" : activeQuizId())}`;
+  elements.modeBadge.textContent = `${answerModeLabel()} · ${difficultyLabel(session.difficulty, session.quizId === "all" ? "all" : activeQuizId())}`;
   elements.mapTitle.textContent = t(activeConfig().title);
   elements.mapSubtitle.textContent = t(activeQuizId() === "landscapes" ? "Landschaftstypologie ufficiale ARE" : WATER_QUIZ_IDS.includes(activeQuizId()) ? "Geometrie ufficiali swissTLMRegio" : activeQuizId() === "profile" ? "Steckbrief della Svizzera" : "Confini cantonali ufficiali");
   elements.category.textContent = t(activeConfig().category);

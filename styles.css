@@ -68,6 +68,7 @@ legend, .full-course-note span { display: block; color: var(--muted); font-size:
 .segmented { display: flex; padding: 4px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--bg); }
 .segmented button { border: 0; background: transparent; color: var(--muted); border-radius: 8px; padding: 9px 14px; cursor: pointer; white-space: nowrap; font-size: .9rem; font-weight: 700; }
 .segmented button.active { background: var(--surface-3); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+#answer-mode-control button { flex: 1; min-width: 0; white-space: normal; }
 .full-course-note { min-width: 0; }
 .full-course-note strong { display: flex; align-items: center; min-height: 44px; padding: 0 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 11px; font-size: .9rem; }
 
