@@ -1,5 +1,5 @@
 [
-  {"id":"area","questionDe":"Wie gross ist die Fläche der Schweiz?","questionEn":"What is the area of Switzerland?","answerDe":"41'284 km²","answerEn":"41,284 km²","answers":["41284","41'284","41 284","41284 km2","41'284 km²","41,284 km²"]},
+  {"id":"area","questionDe":"Wie gross ist die Fläche der Schweiz?","questionEn":"What is the area of Switzerland?","answerDe":"41'291 km²","answerEn":"41,291 km²","answers":["41291","41'291","41 291","41291 km2","41'291 km²","41,291 km²"]},
   {"id":"population","questionDe":"Wie viele Einwohner hat die Schweiz laut Steckbrief?","questionEn":"What population is given in the profile?","answerDe":"7'907'000 Einwohner","answerEn":"7,907,000 inhabitants","answers":["7907000","7'907'000","7 907 000","7,907,000"]},
   {"id":"density","questionDe":"Wie hoch ist die Einwohnerdichte?","questionEn":"What is the population density?","answerDe":"192 Einwohner/km²","answerEn":"192 inhabitants/km²","answers":["192","192 ew km2","192 einwohner km2","192 inhabitants km2"]},
   {"id":"capital","questionDe":"Wie heisst die Hauptstadt der Schweiz?","questionEn":"What is the capital of Switzerland?","answerDe":"Bern","answerEn":"Bern","answers":["Bern"],"latitude":46.948,"longitude":7.4474},
