@@ -198,7 +198,12 @@ export class GeographyMap {
       const name = feature.properties.name;
       const visible = L.geoJSON(feature, {
         interactive: false,
-        style: { color: COLORS.waterLine, weight: 2.7, opacity: 0.9, lineCap: "round" }
+        // The official river geometries contain many adjoining line segments.
+        // Leaflet's default screen-space simplification can shorten neighbouring
+        // segments differently when zoomed out, leaving small visible gaps.
+        smoothFactor: 0,
+        noClip: true,
+        style: { color: COLORS.waterLine, weight: 2.7, opacity: 0.9, lineCap: "round", lineJoin: "round" }
       }).addTo(this.quizGroup);
       visible.eachLayer((path) => {
         this.storeFeature(name, path);
@@ -209,7 +214,9 @@ export class GeographyMap {
         L.geoJSON(feature, {
           interactive: true,
           bubblingMouseEvents: false,
-          style: { color: "#ffffff", weight: 16, opacity: 0.001, lineCap: "round" },
+          smoothFactor: 0,
+          noClip: true,
+          style: { color: "#ffffff", weight: 16, opacity: 0.001, lineCap: "round", lineJoin: "round" },
           onEachFeature: (_, path) => path.on({
             mouseover: () => { if (!this.feedbackLocked) this.setFeatureStyle(name, { color: "#b8ebff", weight: 4.3, opacity: 1 }); },
             mouseout: () => { if (!this.feedbackLocked) this.setFeatureStyle(name, { color: COLORS.waterLine, weight: 2.7, opacity: 0.9 }); },
