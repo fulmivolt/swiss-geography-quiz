@@ -73,7 +73,7 @@
               <span id="elapsed-time">00:00</span>
             </div>
             <div class="progress-track"><span id="progress-bar"></span></div>
-            <div class="timer-track hidden" id="timer-track"><span id="timer-bar"></span></div>
+            <div class="question-timer hidden" id="timer-track"><output id="timer-label" aria-label="Tempo rimanente"></output><div class="timer-track"><span id="timer-bar"></span></div></div>
 
             <section class="question-card">
               <p class="eyebrow" id="category-label">CANTONI</p>
@@ -121,15 +121,22 @@
                 <button id="fullscreen-map" type="button" title="Schermo intero" aria-label="Apri mappa a schermo intero">⛶</button>
               </div>
             </div>
-            <div id="map" role="application" aria-label="Mappa interattiva della Svizzera"></div>
-            <div class="landscape-draw-tools hidden" id="landscape-draw-tools" aria-live="polite">
-              <strong id="landscape-draw-status">0 punti</strong>
-              <span>Fai clic lungo il bordo dell’area, poi chiudi il disegno.</span>
+            <div class="landscape-draw-tools hidden" id="landscape-draw-tools">
+              <strong id="landscape-draw-status" aria-live="polite">0 pennellate</strong>
+              <span>Tieni premuto e colora l’area con il pennello, poi controlla la risposta.</span>
+              <label for="landscape-brush-size">Pennello</label>
+              <select id="landscape-brush-size">
+                <option value="4000">Piccolo</option>
+                <option value="8000" selected>Medio</option>
+                <option value="14000">Grande</option>
+              </select>
               <div>
-                <button id="landscape-undo" type="button">Annulla punto</button>
-                <button id="landscape-finish" type="button">Chiudi disegno</button>
+                <button id="landscape-undo" type="button">Annulla pennellata</button>
+                <button id="landscape-clear" type="button">Svuota</button>
+                <button id="landscape-pan" type="button" aria-pressed="false">Sposta mappa</button>
               </div>
             </div>
+            <div id="map" role="application" aria-label="Mappa interattiva della Svizzera"></div>
             <div class="map-legend">
               <span><i class="legend-canton"></i>Cantoni</span>
               <span id="legend-water-item"><i class="legend-water"></i>Acque</span>

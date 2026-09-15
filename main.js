@@ -3,7 +3,7 @@ import { placeName } from "./names.js";
 import { loadGeographyData } from "./data-loader.js";
 import { GeographyMap } from "./map.js";
 import { ScoreTracker } from "./scoring.js";
-import { QUIZ_CATALOG, acceptedAnswers, answerLabel, buildItems, formatDetails, landscapeDrawingScore, normalizeAnswer, questionText, shuffle } from "./quiz.js";
+import { QUIZ_CATALOG, acceptedAnswers, answerLabel, buildItems, formatDetails, landscapeDrawingScore, normalizeAnswer, questionText, questionTimeLimit, shuffle } from "./quiz.js";
 
 const $ = (selector) => document.querySelector(selector);
 const elements = {
@@ -35,6 +35,7 @@ const elements = {
   elapsed: $("#elapsed-time"),
   timerTrack: $("#timer-track"),
   timerBar: $("#timer-bar"),
+  timerLabel: $("#timer-label"),
   modeBadge: $("#mode-badge"),
   mapTitle: $("#map-title"),
   mapSubtitle: $("#map-subtitle"),
@@ -69,7 +70,8 @@ function renderCatalog() {
   elements.grid.setAttribute("aria-busy", String(!data));
   elements.grid.innerHTML = QUIZ_CATALOG.map((quiz) => {
     const unit = quiz.id === "profile" ? "dati" : quiz.id === "landscapes" ? "aree" : quiz.id === "all" ? "domande" : "elementi";
-    const action = quiz.id === "profile" ? "Studia" : "Inizia";
+    const study = quiz.id === "profile" && settings.difficulty === "easy";
+    const action = study ? "Studia" : "Inizia";
     return `
     <article class="quiz-card" data-number="${quiz.number}">
       <div class="card-top">
@@ -78,7 +80,7 @@ function renderCatalog() {
       </div>
       <h2>${t(quiz.title)}</h2>
       <p>${t(quiz.description)}</p>
-      <button class="start-button" type="button" data-quiz="${quiz.id}" ${data ? "" : "disabled"} aria-label="${t(quiz.id === "profile" ? "Studia {name}" : "Avvia quiz {name}", { name: t(quiz.title) })}">${t(data ? action : "loading")} <span aria-hidden="true">→</span></button>
+      <button class="start-button" type="button" data-quiz="${quiz.id}" ${data ? "" : "disabled"} aria-label="${t(study ? "Studia {name}" : "Avvia quiz {name}", { name: t(quiz.title) })}">${t(data ? action : "loading")} <span aria-hidden="true">→</span></button>
     </article>
   `; }).join("");
 
@@ -100,6 +102,7 @@ function bindSegmented(control, settingKey) {
     if (!button) return;
     settings[settingKey] = button.dataset.value;
     update();
+    if (settingKey === "difficulty") renderCatalog();
   });
 }
 
@@ -110,6 +113,7 @@ function formatTime(totalSeconds) {
 }
 
 function difficultyLabel(value, quizId = session?.quizId) {
+  if (quizId === "profile" && value !== "easy") return t(value === "hard" ? "Difficile · 15 s" : "Normale · 15 s");
   if (value === "hard" && quizId === "landscapes") return t("Difficile · 45 s");
   if (value === "hard" && quizId === "all") return t("Difficile · tempo variabile");
   return t({ easy: "Facile · guida", normal: "Normale", hard: "Difficile · 20 s" }[value]);
@@ -117,7 +121,7 @@ function difficultyLabel(value, quizId = session?.quizId) {
 
 function requestQuizStart(quizId) {
   if (!data) return;
-  if (quizId === "profile") {
+  if (quizId === "profile" && settings.difficulty === "easy") {
     renderProfileStudy();
     elements.profileDialog.showModal();
     return;
@@ -213,7 +217,8 @@ function showQuestion() {
   const mode = activeMode();
   const config = activeConfig();
   session.answered = false;
-  session.questionTimeLimit = quizId === "landscapes" && session.difficulty === "hard" ? 45 : 20;
+  window.clearInterval(session.questionTimer);
+  session.questionTimeLimit = questionTimeLimit(quizId, session.difficulty);
   session.timeRemaining = session.questionTimeLimit;
   session.landscapeSelection = null;
   elements.modeBadge.textContent = `${t(session.quizId === "all" ? "Misto" : mode === "map" ? "Mappa" : "Scrittura")} · ${difficultyLabel(session.difficulty, session.quizId === "all" ? "all" : quizId)}`;
@@ -232,13 +237,17 @@ function showQuestion() {
   elements.input.placeholder = t(quizId === "landscapes" ? "Esempio: 30%" : "Scrivi qui…");
   elements.form.classList.toggle("hidden", mode !== "write");
   elements.drawTools.classList.toggle("hidden", !(quizId === "landscapes" && session.difficulty === "hard"));
-  elements.drawStatus.textContent = t("{count} punti", { count: 0 });
+  elements.drawStatus.textContent = t("{count} pennellate", { count: 0 });
+  $("#landscape-brush-size").value = "8000";
+  $("#landscape-pan").setAttribute("aria-pressed", "false");
   elements.tip.textContent = t(quizId === "landscapes" ? "Inserisci la percentuale e completa anche il compito sulla carta." : mode === "write" ? "Accenti, maiuscole e varianti linguistiche sono accettati." : "Clicca direttamente sulla mappa. Puoi usare zoom e pan.");
   elements.hint.textContent = hintText();
   elements.mapTitle.textContent = t(config.title);
   elements.mapSubtitle.textContent = t(quizId === "landscapes" ? "Landschaftstypologie ufficiale ARE" : WATER_QUIZ_IDS.includes(quizId) ? "Geometrie ufficiali swissTLMRegio" : quizId === "profile" ? "Steckbrief della Svizzera" : "Confini cantonali ufficiali");
   elements.legendWater.classList.toggle("hidden", !WATER_QUIZ_IDS.includes(quizId));
 
+  // Brush controls change the map's available height before fitting the country.
+  geographyMap.resize();
   geographyMap.showQuestion({
     quizId,
     mode,
@@ -248,7 +257,7 @@ function showQuestion() {
     onSelect: handleMapSelection
   });
 
-  if (session.difficulty === "hard") startQuestionTimer();
+  if (session.questionTimeLimit) startQuestionTimer();
   else elements.timerTrack.classList.add("hidden");
 
   if (mode === "write") window.setTimeout(() => elements.input.focus(), 120);
@@ -260,7 +269,7 @@ function hintText() {
   if (quizId === "landscapes") {
     if (session.difficulty === "easy") return t("Le aree sono colorate e nominate: seleziona quella richiesta.");
     if (session.difficulty === "normal") return t("Seleziona l’area corretta usando solo i confini.");
-    return t("Disegna il contorno con almeno tre punti e poi chiudilo.");
+    return t("Tieni premuto e colora l’area con il pennello, poi controlla la risposta.");
   }
   if (quizId === "profile") return t("Scrivi il dato dello Steckbrief; numero e unità sono entrambi accettati.");
   if (session.difficulty === "hard") return t("Nessun aiuto visivo. Il tempo scorre.");
@@ -275,11 +284,14 @@ function hintText() {
 function startQuestionTimer() {
   window.clearInterval(session.questionTimer);
   elements.timerTrack.classList.remove("hidden");
+  elements.timerBar.style.width = "100%";
+  elements.timerLabel.textContent = `${session.questionTimeLimit} s`;
   const started = performance.now();
   session.questionTimer = window.setInterval(() => {
     const elapsed = (performance.now() - started) / 1000;
     session.timeRemaining = Math.max(0, session.questionTimeLimit - elapsed);
     elements.timerBar.style.width = `${(session.timeRemaining / session.questionTimeLimit) * 100}%`;
+    elements.timerLabel.textContent = `${Math.ceil(session.timeRemaining)} s`;
     if (session.timeRemaining <= 0) {
       window.clearInterval(session.questionTimer);
       submitResult({ correct: false, selectedKey: null, clickedLatLng: null, lead: { key: "Tempo scaduto." } });
@@ -300,7 +312,7 @@ function handleMapSelection(selection) {
 
   if (quizId === "landscapes") {
     if (selection.type === "draw-progress") {
-      elements.drawStatus.textContent = t("{count} punti", { count: selection.count });
+      elements.drawStatus.textContent = t("{count} pennellate", { count: selection.count });
       return;
     }
     if (selection.type === "feature") {
@@ -341,12 +353,12 @@ function submitWrittenAnswer(event) {
   if (activeQuizId() === "landscapes") {
     const percentCorrect = acceptedAnswers(item).includes(normalizeAnswer(value));
     if (session.difficulty === "hard") {
-      const points = geographyMap.getLandscapeDrawing();
-      if (points.length < 3 || session.landscapeSelection !== "drawing") {
-        elements.inputError.textContent = t("Disegna l’area con almeno tre punti prima di controllare.");
+      const strokes = geographyMap.getLandscapeDrawing();
+      if (!strokes.some((stroke) => stroke.points.length)) {
+        elements.inputError.textContent = t("Colora l’area con il pennello prima di controllare.");
         return;
       }
-      const drawing = landscapeDrawingScore(points, item, data.landscapes.features);
+      const drawing = landscapeDrawingScore(strokes, item, data.landscapes.features);
       session.landscapeSelection = drawing.correct ? (item.mapKey ?? item.key) : "drawing";
       const lead = { key: percentCorrect && drawing.correct ? "Percentuale e area corrette." : "Controlla percentuale e posizione dell’area." };
       submitResult({ correct: percentCorrect && drawing.correct, selectedKey: null, clickedLatLng: null, lead });
@@ -372,7 +384,7 @@ function submitResult({ correct, selectedKey, clickedLatLng, lead = "" }) {
   const item = currentItem();
   const earned = session.score.record(correct, {
     timeRemaining: session.timeRemaining,
-    timeLimit: session.difficulty === "hard" ? session.questionTimeLimit : 0
+    timeLimit: session.questionTimeLimit
   });
 
   session.lastResult = { correct, selectedKey, clickedLatLng, lead, earned };
@@ -485,6 +497,7 @@ function requestMenu() {
 function showMenu() {
   const previousQuiz = session?.quizId;
   clearSessionTimers();
+  geographyMap?.clearQuestion();
   elements.exitDialog.close();
   elements.quiz.classList.add("hidden");
   elements.menu.classList.remove("hidden");
@@ -550,19 +563,20 @@ function bindUi() {
   $("#profile-close").addEventListener("click", closeProfileStudy);
   $("#profile-ok").addEventListener("click", closeProfileStudy);
   $("#landscape-undo").addEventListener("click", () => {
-    const count = geographyMap?.undoLandscapeDrawPoint() ?? 0;
-    session.landscapeSelection = null;
-    elements.drawStatus.textContent = t("{count} punti", { count });
+    const count = geographyMap?.undoLandscapeStroke() ?? 0;
+    elements.drawStatus.textContent = t("{count} pennellate", { count });
   });
-  $("#landscape-finish").addEventListener("click", () => {
-    const count = geographyMap?.getLandscapeDrawing().length ?? 0;
-    if (count < 3) {
-      elements.drawStatus.textContent = t("Servono almeno tre punti.");
-      return;
-    }
-    session.landscapeSelection = "drawing";
-    elements.drawStatus.textContent = t("Area chiusa con {count} punti.", { count });
-    elements.input.focus();
+  $("#landscape-clear").addEventListener("click", () => {
+    geographyMap?.clearLandscapeDrawing();
+    elements.drawStatus.textContent = t("{count} pennellate", { count: 0 });
+  });
+  $("#landscape-brush-size").addEventListener("change", (event) => {
+    if (geographyMap) geographyMap.brushRadius = Number(event.target.value);
+  });
+  $("#landscape-pan").addEventListener("click", (event) => {
+    const enabled = event.currentTarget.getAttribute("aria-pressed") !== "true";
+    event.currentTarget.setAttribute("aria-pressed", String(enabled));
+    geographyMap?.setLandscapePan(enabled);
   });
   $("#reset-map").addEventListener("click", () => geographyMap?.resetView());
   $("#fullscreen-map").addEventListener("click", async () => {
@@ -592,7 +606,7 @@ function refreshLanguage() {
   if (elements.profileDialog.open) renderProfileStudy();
   updateConnectionStatus();
   if (!session || !geographyMap) return;
-  elements.modeBadge.textContent = `${t(session.quizId === "all" ? "Misto" : session.mode === "map" ? "Mappa" : "Scrittura")} · ${difficultyLabel(session.difficulty, session.quizId === "all" ? "all" : activeQuizId())}`;
+  elements.modeBadge.textContent = `${t(session.quizId === "all" ? "Misto" : activeMode() === "map" ? "Mappa" : "Scrittura")} · ${difficultyLabel(session.difficulty, session.quizId === "all" ? "all" : activeQuizId())}`;
   elements.mapTitle.textContent = t(activeConfig().title);
   elements.mapSubtitle.textContent = t(activeQuizId() === "landscapes" ? "Landschaftstypologie ufficiale ARE" : WATER_QUIZ_IDS.includes(activeQuizId()) ? "Geometrie ufficiali swissTLMRegio" : activeQuizId() === "profile" ? "Steckbrief della Svizzera" : "Confini cantonali ufficiali");
   elements.category.textContent = t(activeConfig().category);
@@ -602,7 +616,16 @@ function refreshLanguage() {
   elements.tip.textContent = t(activeQuizId() === "landscapes" ? "Inserisci la percentuale e completa anche il compito sulla carta." : activeMode() === "write" ? "Accenti, maiuscole e varianti linguistiche sono accettati." : "Clicca direttamente sulla mappa. Puoi usare zoom e pan.");
   if (elements.inputError.textContent) elements.inputError.textContent = t("Scrivi una risposta prima di controllare.");
   const finished = Boolean(document.querySelector(".result-panel"));
+  const drawing = geographyMap.getLandscapeDrawing();
+  const selection = session.landscapeSelection;
   geographyMap.showQuestion({ quizId: activeQuizId(), mode: activeMode(), difficulty: session.difficulty, item: mapItem(currentItem()), items: activeItems(), onSelect: handleMapSelection });
+  if (activeQuizId() === "landscapes") {
+    geographyMap.restoreLandscapeDrawing(drawing);
+    geographyMap.brushRadius = Number($("#landscape-brush-size").value);
+    if (session.difficulty === "hard") geographyMap.setLandscapePan($("#landscape-pan").getAttribute("aria-pressed") === "true");
+    if (selection && selection !== "drawing" && session.difficulty !== "hard") geographyMap.selectLandscape(selection);
+    elements.drawStatus.textContent = t("{count} pennellate", { count: drawing.length });
+  }
   if (session.answered) renderFeedback();
   if (finished) finishQuiz();
 }

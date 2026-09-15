@@ -41,10 +41,9 @@ export class GeographyMap {
     this.map.on("click", (event) => {
       if (this.currentInteraction === "point" && this.currentHandler) {
         this.currentHandler({ type: "point", latlng: event.latlng });
-      } else if (this.currentInteraction === "landscapeDraw") {
-        this.addLandscapeDrawPoint(event.latlng);
       }
     });
+    this.bindLandscapeBrush();
     // The map also changes size when the responsive layout or sidebar changes.
     if (globalThis.ResizeObserver) {
       this.resizeObserver = new ResizeObserver(() => this.resize());
@@ -80,6 +79,8 @@ export class GeographyMap {
   }
 
   clearQuestion() {
+    this.finishBrushStroke();
+    this.setLandscapePan(true);
     this.quizGroup.removeFrom(this.map);
     this.feedbackGroup.removeFrom(this.map);
     this.quizGroup = L.layerGroup().addTo(this.map);
@@ -88,8 +89,8 @@ export class GeographyMap {
     this.currentHandler = null;
     this.currentInteraction = null;
     this.feedbackLocked = false;
-    this.drawPoints = [];
-    this.drawLayer = null;
+    this.brushStrokes = [];
+    this.brushRadius = 8000;
     this.landscapeDifficulty = null;
     this.selectedLandscape = null;
     if (!this.map.hasLayer(this.baseGroup)) this.baseGroup.addTo(this.map);
@@ -117,7 +118,8 @@ export class GeographyMap {
       this.map.removeLayer(this.baseGroup);
       if (difficulty === "hard") {
         this.baseGroup.addTo(this.map);
-        this.currentInteraction = "landscapeDraw";
+        this.currentInteraction = "landscapeBrush";
+        this.setLandscapePan(false);
       } else {
         this.renderLandscapes({ difficulty, interactive: true });
       }
@@ -243,32 +245,89 @@ export class GeographyMap {
     for (const layer of this.featureIndex.get(name) ?? []) layer.bringToFront?.();
   }
 
-  addLandscapeDrawPoint(latlng) {
-    this.drawPoints.push(latlng);
-    this.drawLayer?.removeFrom(this.quizGroup);
-    this.drawLayer = L.polygon(this.drawPoints, {
-      color: COLORS.target,
-      weight: 2.6,
-      dashArray: "7 5",
-      fillColor: COLORS.target,
-      fillOpacity: 0.2,
-      interactive: false
-    }).addTo(this.quizGroup);
-    this.currentHandler?.({ type: "draw-progress", count: this.drawPoints.length });
+  bindLandscapeBrush() {
+    const container = this.map.getContainer();
+    container.addEventListener("pointerdown", (event) => {
+      if (this.currentInteraction !== "landscapeBrush" || this.brushPan || this.brushPointer != null || event.button !== 0 || event.target.closest(".leaflet-control")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      this.brushPointer = event.pointerId;
+      container.setPointerCapture(event.pointerId);
+      this.activeStroke = { radius: this.brushRadius, points: [], layer: L.layerGroup().addTo(this.quizGroup) };
+      this.brushStrokes.push(this.activeStroke);
+      this.paintLandscape(this.map.mouseEventToLatLng(event));
+    }, { capture: true });
+    container.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== this.brushPointer) return;
+      event.preventDefault();
+      event.stopPropagation();
+      this.paintLandscape(this.map.mouseEventToLatLng(event));
+    }, { capture: true });
+    for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
+      container.addEventListener(type, (event) => {
+        if (event.pointerId !== this.brushPointer) return;
+        if (type === "pointerup") this.paintLandscape(this.map.mouseEventToLatLng(event));
+        this.finishBrushStroke();
+      });
+    }
   }
 
-  undoLandscapeDrawPoint() {
-    if (!this.drawPoints.length) return 0;
-    this.drawPoints.pop();
-    this.drawLayer?.removeFrom(this.quizGroup);
-    this.drawLayer = this.drawPoints.length
-      ? L.polygon(this.drawPoints, { color: COLORS.target, weight: 2.6, dashArray: "7 5", fillColor: COLORS.target, fillOpacity: 0.2, interactive: false }).addTo(this.quizGroup)
-      : null;
-    return this.drawPoints.length;
+  setLandscapePan(enabled) {
+    this.finishBrushStroke();
+    this.brushPan = enabled;
+    this.map.getContainer().classList.toggle("landscape-brushing", !enabled);
+    for (const handler of [this.map.dragging, this.map.touchZoom, this.map.doubleClickZoom, this.map.boxZoom]) {
+      if (enabled) handler?.enable();
+      else handler?.disable();
+    }
+  }
+
+  finishBrushStroke() {
+    const pointer = this.brushPointer;
+    this.brushPointer = null;
+    this.activeStroke = null;
+    const container = this.map.getContainer();
+    if (pointer != null && container.hasPointerCapture?.(pointer)) container.releasePointerCapture(pointer);
+  }
+
+  paintLandscape(latlng) {
+    const stroke = this.activeStroke;
+    if (!stroke || this.feedbackLocked) return;
+    const previous = stroke.points.at(-1);
+    const distance = previous ? this.map.distance(previous, latlng) : 0;
+    if (previous && distance < stroke.radius / 4) return;
+    // Interpolate geographic brush stamps so fast drags stay continuous at every zoom.
+    const steps = Math.max(1, Math.ceil(distance / (stroke.radius / 3)));
+    for (let step = 1; step <= steps; step++) {
+      const point = previous ? L.latLng(previous.lat + (latlng.lat - previous.lat) * step / steps, previous.lng + (latlng.lng - previous.lng) * step / steps) : latlng;
+      stroke.points.push(point);
+      L.circle(point, { radius: stroke.radius, stroke: false, fillColor: COLORS.target, fillOpacity: 0.65, interactive: false }).addTo(stroke.layer);
+    }
+    this.currentHandler?.({ type: "draw-progress", count: this.brushStrokes.length });
+  }
+
+  undoLandscapeStroke() {
+    this.finishBrushStroke();
+    this.brushStrokes.pop()?.layer.removeFrom(this.quizGroup);
+    return this.brushStrokes.length;
+  }
+
+  clearLandscapeDrawing() {
+    while (this.brushStrokes.length) this.undoLandscapeStroke();
   }
 
   getLandscapeDrawing() {
-    return [...this.drawPoints];
+    return this.brushStrokes.map(({ radius, points }) => ({ radius, points: points.map(({ lat, lng }) => ({ lat, lng })) }));
+  }
+
+  restoreLandscapeDrawing(strokes) {
+    for (const stroke of strokes) {
+      const restored = { ...stroke, points: [], layer: L.layerGroup().addTo(this.quizGroup) };
+      this.brushStrokes.push(restored);
+      this.activeStroke = restored;
+      for (const point of stroke.points) this.paintLandscape(L.latLng(point.lat, point.lng));
+      this.finishBrushStroke();
+    }
   }
 
   renderWaters({ interactive, labels, includeRivers = true, includeLakes = true }) {
@@ -380,15 +439,22 @@ export class GeographyMap {
   }
 
   showResult({ correct, correctItem, selectedKey, clickedLatLng, details }) {
+    this.finishBrushStroke();
+    this.setLandscapePan(true);
     this.currentHandler = null;
     this.currentInteraction = null;
     this.feedbackLocked = true;
+
+    if (correctItem.answerType === "profile") return;
 
     if (correctItem.answerType === "landscape") {
       if (!this.featureIndex.has(correctItem.key)) this.renderLandscapes({ difficulty: "easy", interactive: false });
       if (selectedKey && selectedKey !== correctItem.key) this.setFeatureStyle(selectedKey, { fillColor: COLORS.wrong, fillOpacity: 0.8 });
       this.setFeatureStyle(correctItem.key, { fillColor: COLORS.correct, fillOpacity: 0.88 });
-      if (this.drawLayer) this.drawLayer.setStyle({ color: correct ? COLORS.correct : COLORS.wrong, fillColor: correct ? COLORS.correct : COLORS.wrong });
+      for (const stroke of this.brushStrokes) stroke.layer.eachLayer((layer) => {
+        layer.setStyle({ fillColor: correct ? COLORS.correct : COLORS.wrong, fillOpacity: 0.45 });
+        layer.bringToFront();
+      });
       const anchor = { Jura: [47.22, 7.16], Mittelland: [47.18, 8.45], Alpen: [46.43, 8.45] }[correctItem.key];
       L.tooltip({ permanent: true, direction: "center", className: "landscape-label" })
         .setLatLng(anchor).setContent(`${placeName(correctItem)} · ${correctItem.percent}%`).addTo(this.feedbackGroup);

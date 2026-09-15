@@ -103,7 +103,7 @@ export function normalizeAnswer(value) {
 }
 
 export function acceptedAnswers(item) {
-  if (item.answers?.length) return [...new Set(item.answers.map(normalizeAnswer))];
+  if (item.answers?.length) return [...new Set([...item.answers, item.answerDe, item.answerEn].filter(Boolean).map(normalizeAnswer))];
   if (item.answerType === "landscape") return [normalizeAnswer(String(item.percent)), normalizeAnswer(`${item.percent}%`)];
   return [...new Set(nameVariants(item).flatMap((name) => [
     normalizeAnswer(name),
@@ -144,10 +144,15 @@ function pointInGeometry(point, geometry) {
   return polygons.some((polygon) => pointInRing(point, polygon[0]) && !polygon.slice(1).some((hole) => pointInRing(point, hole)));
 }
 
-export function landscapeDrawingScore(points, item, allFeatures) {
-  if (points.length < 3) return { correct: false, precision: 0, recall: 0 };
-  const drawing = points.map((point) => Array.isArray(point) ? point : [point.lng, point.lat]);
-  if (drawing[0][0] !== drawing.at(-1)[0] || drawing[0][1] !== drawing.at(-1)[1]) drawing.push(drawing[0]);
+export function questionTimeLimit(quizId, difficulty) {
+  if (quizId === "profile" && difficulty !== "easy") return 15;
+  if (difficulty !== "hard") return 0;
+  return quizId === "landscapes" ? 45 : 20;
+}
+
+export function landscapeDrawingScore(strokes, item, allFeatures) {
+  const stamps = strokes.flatMap(({ radius, points }) => points.map(({ lat, lng }) => ({ lat, lng, radius })));
+  if (!stamps.length) return { correct: false, precision: 0, recall: 0 };
   let target = 0;
   let drawn = 0;
   let intersection = 0;
@@ -159,7 +164,12 @@ export function landscapeDrawingScore(points, item, allFeatures) {
       const countryFeature = allFeatures.find((feature) => pointInGeometry(point, feature.geometry));
       if (!countryFeature) continue;
       const inTarget = countryFeature.properties.name === item.mapKey || countryFeature.properties.name === item.key;
-      const inDrawing = pointInRing(point, drawing);
+      const inDrawing = stamps.some((stamp) => {
+        const north = (latitude - stamp.lat) * 111195;
+        if (Math.abs(north) > stamp.radius) return false;
+        const east = (longitude - stamp.lng) * 111195 * Math.cos(latitude * Math.PI / 180);
+        return east * east + north * north <= stamp.radius * stamp.radius;
+      });
       if (inTarget) target += 1;
       if (inDrawing) drawn += 1;
       if (inTarget && inDrawing) intersection += 1;
@@ -167,5 +177,5 @@ export function landscapeDrawingScore(points, item, allFeatures) {
   }
   const precision = drawn ? intersection / drawn : 0;
   const recall = target ? intersection / target : 0;
-  return { correct: precision >= 0.55 && recall >= 0.45, precision, recall };
+  return { correct: precision >= 0.7 && recall >= 0.5, precision, recall };
 }
