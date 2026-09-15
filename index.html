@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1018" />
-    <meta name="description" content="Swiss geography quiz — Deutsch / English. Cantons, capitals, cities, rivers, lakes, mountains and Alpine passes." />
+    <meta name="description" content="Swiss geography quiz — Deutsch / English. Eleven modes with cantons, cities, waters, mountains, Swiss profile and landscapes." />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e52835'/%3E%3Cpath fill='white' d='M26 13h12v13h13v12H38v13H26V38H13V26h13z'/%3E%3C/svg%3E" />
     <link rel="stylesheet" href="./leaflet.css" />
     <link rel="stylesheet" href="./styles.css" />
@@ -122,6 +122,14 @@
               </div>
             </div>
             <div id="map" role="application" aria-label="Mappa interattiva della Svizzera"></div>
+            <div class="landscape-draw-tools hidden" id="landscape-draw-tools" aria-live="polite">
+              <strong id="landscape-draw-status">0 punti</strong>
+              <span>Fai clic lungo il bordo dell’area, poi chiudi il disegno.</span>
+              <div>
+                <button id="landscape-undo" type="button">Annulla punto</button>
+                <button id="landscape-finish" type="button">Chiudi disegno</button>
+              </div>
+            </div>
             <div class="map-legend">
               <span><i class="legend-canton"></i>Cantoni</span>
               <span id="legend-water-item"><i class="legend-water"></i>Acque</span>
@@ -136,7 +144,7 @@
       <button class="dialog-close" id="info-close" aria-label="Chiudi">×</button>
       <p class="eyebrow">FONTI CARTOGRAFICHE</p>
       <h2>Una mappa, non un’illustrazione</h2>
-      <p>I confini dei 26 cantoni provengono da swissBOUNDARIES3D 2026. Fiumi e laghi sono estratti da swissTLMRegio 2025; località, vette e passi usano coordinate geografiche reali. La base cartografica è © OpenStreetMap.</p>
+      <p>I confini dei 26 cantoni provengono da swissBOUNDARIES3D 2026. Fiumi e laghi sono estratti da swissTLMRegio 2025; le Landschaften derivano dalla Landschaftstypologie Schweiz dell’ARE. Località, vette e passi usano coordinate geografiche reali. La base cartografica è © OpenStreetMap.</p>
       <p>I laghi transfrontalieri sono mostrati nella loro geometria completa quando disponibile nel dataset.</p>
       <button class="primary-button" id="info-ok" type="button">Ho capito</button>
     </dialog>
@@ -158,6 +166,18 @@
       <div class="dialog-actions city-option-actions">
         <button id="city-only-button" type="button">No, solo città</button>
         <button class="primary-button" id="city-capitals-button" type="button">Sì, includili</button>
+      </div>
+    </dialog>
+
+    <dialog id="profile-dialog" class="profile-dialog">
+      <button class="dialog-close" id="profile-close" aria-label="Chiudi">×</button>
+      <p class="eyebrow">STECKBRIEF DELLA SVIZZERA</p>
+      <h2>Studia i dati fondamentali</h2>
+      <p>Apri una scheda alla volta per vedere la risposta, oppure mostrale tutte.</p>
+      <div class="profile-facts" id="profile-facts"></div>
+      <div class="dialog-actions profile-actions">
+        <button id="profile-toggle-all" type="button">Mostra tutte le risposte</button>
+        <button class="primary-button" id="profile-ok" type="button">Torna al menu</button>
       </div>
     </dialog>
 

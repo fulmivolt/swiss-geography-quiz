@@ -153,6 +153,13 @@ legend, .full-course-note span { display: block; color: var(--muted); font-size:
 .map-legend .legend-water { background: #135b83; border-color: #43a8df; }
 .map-legend .legend-correct { background: var(--green); border: 0; }
 .map-legend .legend-wrong { background: var(--red); border: 0; margin-left: 4px; }
+.landscape-draw-tools { position: absolute; right: 16px; top: 80px; z-index: 650; width: min(320px, calc(100% - 32px)); padding: 14px; border: 1px solid #e3ad45; border-radius: 12px; background: rgba(11,16,24,.95); box-shadow: var(--shadow); }
+.landscape-draw-tools strong { display: block; color: var(--amber); margin-bottom: 4px; }
+.landscape-draw-tools span { display: block; color: var(--muted); font-size: .78rem; line-height: 1.4; }
+.landscape-draw-tools div { display: flex; gap: 8px; margin-top: 11px; }
+.landscape-draw-tools button { min-height: 38px; padding: 0 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-2); color: var(--text); cursor: pointer; font-weight: 750; }
+.landscape-draw-tools button:last-child { background: var(--amber); border-color: var(--amber); color: #171006; }
+.landscape-label { border: 1px solid rgba(255,255,255,.58) !important; background: rgba(9,14,21,.9) !important; color: white !important; box-shadow: 0 5px 15px rgba(0,0,0,.3) !important; font-weight: 850; }
 .map-stage:fullscreen { grid-template-rows: 64px 1fr; background: var(--bg); }
 .map-stage.map-expanded { position: fixed; inset: 0; z-index: 2000; grid-template-rows: 64px 1fr; background: var(--bg); }
 
@@ -179,6 +186,16 @@ dialog > .primary-button { margin-top: 10px; }
 .compact-dialog { width: min(440px, calc(100% - 32px)); }
 .city-option-actions .primary-button { background: var(--red); border-color: var(--red); color: white; }
 .danger-button { background: var(--red-dark) !important; border-color: transparent !important; }
+.profile-dialog { width: min(900px, calc(100% - 32px)); max-height: min(820px, calc(100vh - 32px)); overflow: auto; }
+.profile-dialog > p { margin-top: 0; }
+.profile-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 20px; }
+.profile-fact { min-height: 76px; padding: 13px 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); color: var(--text); text-align: left; cursor: pointer; }
+.profile-fact:hover { border-color: #60738a; }
+.profile-fact span { display: block; color: var(--muted); font-size: .77rem; line-height: 1.35; }
+.profile-fact strong { display: block; margin-top: 6px; color: #ff818a; font-size: 1rem; }
+.profile-fact[aria-expanded="false"] strong { filter: blur(7px); opacity: .65; user-select: none; }
+.profile-actions { position: sticky; bottom: -28px; padding: 16px 0 4px; background: linear-gradient(transparent, var(--surface) 22%); }
+.profile-actions .primary-button { background: var(--red); color: white; }
 
 @media (max-width: 920px) {
   .quiz-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -212,6 +229,8 @@ dialog > .primary-button { margin-top: 10px; }
   .map-stage { min-height: 500px; }
   .map-toolbar { padding: 0 12px; }
   .map-legend { left: 10px; bottom: 10px; max-width: calc(100% - 20px); }
+  .profile-facts { grid-template-columns: 1fr; }
+  .landscape-draw-tools { right: 10px; top: 74px; width: calc(100% - 20px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

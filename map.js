@@ -41,6 +41,8 @@ export class GeographyMap {
     this.map.on("click", (event) => {
       if (this.currentInteraction === "point" && this.currentHandler) {
         this.currentHandler({ type: "point", latlng: event.latlng });
+      } else if (this.currentInteraction === "landscapeDraw") {
+        this.addLandscapeDrawPoint(event.latlng);
       }
     });
     // The map also changes size when the responsive layout or sidebar changes.
@@ -86,6 +88,10 @@ export class GeographyMap {
     this.currentHandler = null;
     this.currentInteraction = null;
     this.feedbackLocked = false;
+    this.drawPoints = [];
+    this.drawLayer = null;
+    this.landscapeDifficulty = null;
+    this.selectedLandscape = null;
     if (!this.map.hasLayer(this.baseGroup)) this.baseGroup.addTo(this.map);
   }
 
@@ -100,6 +106,24 @@ export class GeographyMap {
     this.setBasemap(difficulty === "easy");
     this.currentHandler = onSelect;
     this.currentInteraction = mode === "map" && ["capitals", "cities", "mountains", "passes"].includes(quizId) ? "point" : null;
+
+    if (quizId === "profile") {
+      this.resetView(false);
+      return;
+    }
+
+    if (quizId === "landscapes") {
+      this.landscapeDifficulty = difficulty;
+      this.map.removeLayer(this.baseGroup);
+      if (difficulty === "hard") {
+        this.baseGroup.addTo(this.map);
+        this.currentInteraction = "landscapeDraw";
+      } else {
+        this.renderLandscapes({ difficulty, interactive: true });
+      }
+      this.resetView(false);
+      return;
+    }
 
     if (quizId === "cantons") {
       this.map.removeLayer(this.baseGroup);
@@ -171,6 +195,80 @@ export class GeographyMap {
       interactive: false,
       style: { color: COLORS.target, weight: 2.5, fillColor: COLORS.target, fillOpacity: 0.18 }
     }).addTo(this.quizGroup);
+  }
+
+  landscapeStyle(feature, difficulty = this.landscapeDifficulty) {
+    const color = feature.properties.color;
+    return difficulty === "easy"
+      ? { stroke: false, fillColor: color, fillOpacity: 0.82 }
+      : { stroke: false, fillColor: { Jura: "#64758c", Mittelland: "#4c6078", Alpen: "#344960" }[feature.properties.name], fillOpacity: 0.86 };
+  }
+
+  renderLandscapes({ difficulty, interactive }) {
+    const layer = L.geoJSON(this.data.landscapes, {
+      interactive,
+      bubblingMouseEvents: false,
+      style: (feature) => this.landscapeStyle(feature, difficulty),
+      onEachFeature: (feature, path) => {
+        const name = feature.properties.name;
+        this.storeFeature(name, path);
+        if (!interactive) return;
+        path.on({
+          mouseover: () => { if (!this.feedbackLocked) this.setFeatureStyle(name, { fillColor: "#738aa5", fillOpacity: 0.94 }); },
+          mouseout: () => { if (!this.feedbackLocked && this.selectedLandscape !== name) this.resetLandscapeStyle(name); },
+          click: () => this.currentHandler?.({ type: "feature", key: name })
+        });
+      }
+    }).addTo(this.quizGroup);
+    if (difficulty === "easy") {
+      for (const [name, position] of [["Jura", [47.22, 7.16]], ["Mittelland", [47.18, 8.45]], ["Alpen", [46.43, 8.45]]]) {
+        L.tooltip({ permanent: true, direction: "center", className: "landscape-label" })
+          .setLatLng(position).setContent(placeName(name)).addTo(this.quizGroup);
+      }
+    }
+    return layer;
+  }
+
+  resetLandscapeStyle(name) {
+    for (const layer of this.featureIndex.get(name) ?? []) {
+      const feature = layer.feature;
+      if (feature) layer.setStyle(this.landscapeStyle(feature));
+    }
+  }
+
+  selectLandscape(name) {
+    for (const key of ["Jura", "Mittelland", "Alpen"]) this.resetLandscapeStyle(key);
+    this.selectedLandscape = name;
+    this.setFeatureStyle(name, { fillColor: COLORS.target, fillOpacity: 0.9 });
+    for (const layer of this.featureIndex.get(name) ?? []) layer.bringToFront?.();
+  }
+
+  addLandscapeDrawPoint(latlng) {
+    this.drawPoints.push(latlng);
+    this.drawLayer?.removeFrom(this.quizGroup);
+    this.drawLayer = L.polygon(this.drawPoints, {
+      color: COLORS.target,
+      weight: 2.6,
+      dashArray: "7 5",
+      fillColor: COLORS.target,
+      fillOpacity: 0.2,
+      interactive: false
+    }).addTo(this.quizGroup);
+    this.currentHandler?.({ type: "draw-progress", count: this.drawPoints.length });
+  }
+
+  undoLandscapeDrawPoint() {
+    if (!this.drawPoints.length) return 0;
+    this.drawPoints.pop();
+    this.drawLayer?.removeFrom(this.quizGroup);
+    this.drawLayer = this.drawPoints.length
+      ? L.polygon(this.drawPoints, { color: COLORS.target, weight: 2.6, dashArray: "7 5", fillColor: COLORS.target, fillOpacity: 0.2, interactive: false }).addTo(this.quizGroup)
+      : null;
+    return this.drawPoints.length;
+  }
+
+  getLandscapeDrawing() {
+    return [...this.drawPoints];
   }
 
   renderWaters({ interactive, labels, includeRivers = true, includeLakes = true }) {
@@ -285,6 +383,17 @@ export class GeographyMap {
     this.currentHandler = null;
     this.currentInteraction = null;
     this.feedbackLocked = true;
+
+    if (correctItem.answerType === "landscape") {
+      if (!this.featureIndex.has(correctItem.key)) this.renderLandscapes({ difficulty: "easy", interactive: false });
+      if (selectedKey && selectedKey !== correctItem.key) this.setFeatureStyle(selectedKey, { fillColor: COLORS.wrong, fillOpacity: 0.8 });
+      this.setFeatureStyle(correctItem.key, { fillColor: COLORS.correct, fillOpacity: 0.88 });
+      if (this.drawLayer) this.drawLayer.setStyle({ color: correct ? COLORS.correct : COLORS.wrong, fillColor: correct ? COLORS.correct : COLORS.wrong });
+      const anchor = { Jura: [47.22, 7.16], Mittelland: [47.18, 8.45], Alpen: [46.43, 8.45] }[correctItem.key];
+      L.tooltip({ permanent: true, direction: "center", className: "landscape-label" })
+        .setLatLng(anchor).setContent(`${placeName(correctItem)} · ${correctItem.percent}%`).addTo(this.feedbackGroup);
+      return;
+    }
 
     if (selectedKey && !correct) this.emphasizeFeature(selectedKey, COLORS.wrong);
     if (this.featureIndex.has(correctItem.key)) {

@@ -6,6 +6,8 @@ const FILES = {
   cantons: "./cantons.json",
   rivers: "./rivers.geojson",
   lakes: "./lakes.geojson",
+  landscapes: "./landscapes.geojson",
+  profile: "./swiss-profile.json",
   cities: "./cities.json",
   mountains: "./mountains.json",
   passes: "./passes.json"
@@ -16,6 +18,8 @@ const EXPECTED_COUNTS = {
   cantonGeometry: 26,
   rivers: 16,
   lakes: 15,
+  landscapes: 3,
+  profile: 17,
   cities: 22,
   mountains: 14,
   passes: 16
